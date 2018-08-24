@@ -1,0 +1,14 @@
+[package]
+name = "serde_type_name"
+version = "0.1.0"
+authors = ["Murali Mohan Rath <murali@mmrath.com>"]
+license = "MIT/Apache-2.0"
+description = "lookup name of type for any struct or enum that derives serde Serialize"
+homepage = "https://github.com/mmrath/serde_type_name"
+keywords = ["serde", "typename", "type", "name"]
+readme = "README.md"
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+
+[dependencies]
+serde = "^1.0"
+serde_derive = "^1.0"
