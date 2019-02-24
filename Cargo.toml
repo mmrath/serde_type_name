@@ -1,6 +1,6 @@
 [package]
 name = "serde_type_name"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Murali Mohan Rath <murali@mmrath.com>"]
 license = "MIT/Apache-2.0"
 description = "lookup name of type for any struct or enum that derives serde Serialize"

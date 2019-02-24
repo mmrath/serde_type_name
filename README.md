@@ -8,7 +8,7 @@ https://stackoverflow.com/questions/46612327/using-serde-to-get-a-types-name-as-
 
 # Usage
 
-```rust
+```
 extern crate serde_type_name;
 extern crate serde;
 #[macro_use]
@@ -35,20 +35,20 @@ struct GenericStruct<T: Serialize> {
 }
 
 fn main() {
-    assert_eq!("SimpleEnum", type_name(&SimpleEnum::A(10)));
-    assert_eq!("SimpleEnum", type_name(&SimpleEnum::B));
-    assert_eq!("SimpleEnum", type_name(&SimpleEnum::C { code: 32 }));
+    assert_eq!("SimpleEnum", type_name(&SimpleEnum::A(10)).unwrap());
+    assert_eq!("SimpleEnum", type_name(&SimpleEnum::B).unwrap());
+    assert_eq!("SimpleEnum", type_name(&SimpleEnum::C { code: 32 }).unwrap());
     
-    assert_eq!("SimpleStruct", type_name(&SimpleStruct { a: 20 }));
+    assert_eq!("SimpleStruct", type_name(&SimpleStruct { a: 20 }).unwrap());
     
     let gs = GenericStruct { inner: 32 };
-    assert_eq!("GenericStruct", type_name(&gs));
+    assert_eq!("GenericStruct", type_name(&gs).unwrap());
     
     let gs_enum = GenericStruct {
         inner: SimpleEnum::B,
     };
-    assert_eq!("GenericStruct", type_name(&gs_enum));
-    assert_eq!("SimpleEnum", type_name(&gs_enum.inner));
+    assert_eq!("GenericStruct", type_name(&gs_enum).unwrap());
+    assert_eq!("SimpleEnum", type_name(&gs_enum.inner).unwrap());
 }
 ```
 

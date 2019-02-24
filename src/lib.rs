@@ -41,43 +41,46 @@ use std::fmt::{self, Display};
 /// }
 ///
 /// fn main() {
-///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::A(10)));
-///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::B));
-///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::C { code: 32 }));
+///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::A(10)).unwrap());
+///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::B).unwrap());
+///     assert_eq!("SimpleEnum", type_name(&SimpleEnum::C { code: 32 }).unwrap());
 ///
-///     assert_eq!("SimpleStruct", type_name(&SimpleStruct { a: 20 }));
+///     assert_eq!("SimpleStruct", type_name(&SimpleStruct { a: 20 }).unwrap());
 ///
 ///     let gs = GenericStruct { inner: 32 };
-///     assert_eq!("GenericStruct", type_name(&gs));
+///     assert_eq!("GenericStruct", type_name(&gs).unwrap());
 ///
 ///     let gs_enum = GenericStruct {
 ///         inner: SimpleEnum::B,
 ///     };
-///     assert_eq!("GenericStruct", type_name(&gs_enum));
-///     assert_eq!("SimpleEnum", type_name(&gs_enum.inner));
+///     assert_eq!("GenericStruct", type_name(&gs_enum).unwrap());
+///     assert_eq!("SimpleEnum", type_name(&gs_enum.inner).unwrap());
 /// }
 /// ```
+///
 
-pub fn type_name<T: Serialize>(t: &T) -> &'static str {
-    #[derive(Debug)]
-    struct NotStruct;
-    type Result<T> = std::result::Result<T, NotStruct>;
-    impl std::error::Error for NotStruct {
-        fn description(&self) -> &str {
-            "not struct"
-        }
-    }
-    impl Display for NotStruct {
-        fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-            unimplemented!()
-        }
-    }
-    impl ser::Error for NotStruct {
-        fn custom<T: Display>(_msg: T) -> Self {
-            NotStruct
-        }
-    }
+#[derive(Debug)]
+pub struct NotStruct;
 
+type Result<T> = std::result::Result<T, NotStruct>;
+
+impl std::error::Error for NotStruct {
+    fn description(&self) -> &str {
+        "not struct"
+    }
+}
+impl Display for NotStruct {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", "not struct")
+    }
+}
+impl ser::Error for NotStruct {
+    fn custom<T: Display>(_msg: T) -> Self {
+        NotStruct
+    }
+}
+
+pub fn type_name<T: Serialize>(t: &T) -> Result<&'static str> {
     struct TypeName;
     impl Serializer for TypeName {
         type Ok = &'static str;
@@ -251,7 +254,7 @@ pub fn type_name<T: Serialize>(t: &T) -> &'static str {
             Ok(self.0)
         }
     }
-    t.serialize(TypeName).unwrap()
+    t.serialize(TypeName)
 }
 
 #[cfg(test)]
@@ -277,22 +280,28 @@ mod tests {
 
     #[test]
     fn test_enum() {
-        assert_eq!("SimpleEnum", super::type_name(&SimpleEnum::A(10)));
-        assert_eq!("SimpleEnum", super::type_name(&SimpleEnum::B));
-        assert_eq!("SimpleEnum", super::type_name(&SimpleEnum::C { code: 32 }));
+        assert_eq!("SimpleEnum", super::type_name(&SimpleEnum::A(10)).unwrap());
+        assert_eq!("SimpleEnum", super::type_name(&SimpleEnum::B).unwrap());
+        assert_eq!(
+            "SimpleEnum",
+            super::type_name(&SimpleEnum::C { code: 32 }).unwrap()
+        );
     }
 
     #[test]
     fn test_struct() {
-        assert_eq!("SimpleStruct", super::type_name(&SimpleStruct { a: 20 }));
+        assert_eq!(
+            "SimpleStruct",
+            super::type_name(&SimpleStruct { a: 20 }).unwrap()
+        );
 
         let gs = GenericStruct { inner: 32 };
-        assert_eq!("GenericStruct", super::type_name(&gs));
+        assert_eq!("GenericStruct", super::type_name(&gs).unwrap());
 
         let gs_enum = GenericStruct {
             inner: SimpleEnum::B,
         };
-        assert_eq!("GenericStruct", super::type_name(&gs_enum));
-        assert_eq!("SimpleEnum", super::type_name(&gs_enum.inner));
+        assert_eq!("GenericStruct", super::type_name(&gs_enum).unwrap());
+        assert_eq!("SimpleEnum", super::type_name(&gs_enum.inner).unwrap());
     }
 }
